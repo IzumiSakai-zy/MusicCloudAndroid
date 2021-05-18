@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import zy.musiccloudandroid.R
+import zy.musiccloudandroid.const.MySingleTon
 import zy.musiccloudandroid.entity.Song
 
 class SongAdapter(val songList:ArrayList<Song>):
@@ -35,9 +36,9 @@ class SongAdapter(val songList:ArrayList<Song>):
         holder.singer.text = songList[position].singer
         holder.songName.text = songList[position].name
         holder.button.setOnClickListener {
-            val mediaPlayer = MediaPlayer()
+            val mediaPlayer = MySingleTon.getMediaPlayer()
             if (mediaPlayer.isPlaying){
-                mediaPlayer.stop()
+                mediaPlayer.reset()
             }
             Log.d("MainActivity","设置DataSource之前")
             //mediaPlayer.setDataSource("http://m7.music.126.net/20210516231841/e21466bce0f98a3dd3a9001b2be62153/ymusic/iLvYuJFiuSGt-2GzLoU8NQ==/509951163150639275")
@@ -50,6 +51,7 @@ class SongAdapter(val songList:ArrayList<Song>):
                 it.start()
                 Log.d("MainActivity","开始完成")
             }
+            mediaPlayer.isLooping
         }
     }
 }
