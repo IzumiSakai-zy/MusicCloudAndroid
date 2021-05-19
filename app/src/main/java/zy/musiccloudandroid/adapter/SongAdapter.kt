@@ -1,6 +1,5 @@
 package zy.musiccloudandroid.adapter
 
-import android.media.MediaPlayer
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -37,9 +36,7 @@ class SongAdapter(val songList:ArrayList<Song>):
         holder.songName.text = songList[position].name
         holder.button.setOnClickListener {
             val mediaPlayer = MySingleTon.getMediaPlayer()
-            if (mediaPlayer.isPlaying){
-                mediaPlayer.reset()
-            }
+            mediaPlayer.reset()
             Log.d("MainActivity","设置DataSource之前")
             //mediaPlayer.setDataSource("http://m7.music.126.net/20210516231841/e21466bce0f98a3dd3a9001b2be62153/ymusic/iLvYuJFiuSGt-2GzLoU8NQ==/509951163150639275")
             mediaPlayer.setDataSource("http://47.108.63.126:8001/song/download?singer=${songList[position].singer}&songname=${songList[position].name}")
@@ -51,7 +48,12 @@ class SongAdapter(val songList:ArrayList<Song>):
                 it.start()
                 Log.d("MainActivity","开始完成")
             }
-            mediaPlayer.isLooping
+            mediaPlayer.setOnCompletionListener {
+                Log.d("MainActivity","播放完毕，开始下一首播放")
+                mediaPlayer.reset()
+                it.setDataSource("http://47.108.63.126:8001/song/download?singer=${songList[position + 1].singer}&songname=${songList[position + 1].name}")
+                it.prepareAsync()
+            }
         }
     }
 }
