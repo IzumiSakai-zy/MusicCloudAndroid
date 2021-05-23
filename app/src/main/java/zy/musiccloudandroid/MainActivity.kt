@@ -18,51 +18,71 @@ import zy.musiccloudandroid.const.MySingleTon
 import zy.musiccloudandroid.entity.Song
 import zy.musiccloudandroid.model.MainActivityViewModel
 import zy.musiccloudandroid.model.MainViewModelProvider
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        val result = JsonObjectRequest(Request.Method.GET,"http://47.108.63.126/api/songs",null,
-//            Response.Listener {
-//                Log.d("MainActivity",it.toString())
-//                val jsonArray = JSONObject(it.toString()).getJSONObject("data").getJSONArray("songs")
-//                Log.d("MainActivity",jsonArray.toString())
-//
-//                MySingleTon.getSongArrayList().also {
-//                    for (i in 0..(jsonArray.length() - 1)){
-//                        it.add(MySingleTon.getGson().fromJson(jsonArray[i].toString(),Song::class.java))
-//                    }
-//                }
-//                songRecyclerView.adapter = SongAdapter(MySingleTon.getSongArrayList())
-//                songRecyclerView.layoutManager = LinearLayoutManager(this)
-//            },
-//            Response.ErrorListener {
-//                Log.d("MainActivity",it.toString())
-//            })
-//        MySingleTon.getInstance(this).addToRequestQueue(result)
+        supportActionBar?.hide()
+
+        val result = JsonObjectRequest(Request.Method.GET,"http://47.108.63.126/api/songs",null,
+            Response.Listener {
+                Log.d("MainActivity",it.toString())
+                val jsonArray = JSONObject(it.toString()).getJSONObject("data").getJSONArray("songs")
+                Log.d("MainActivity",jsonArray.toString())
+
+                MySingleTon.getSongArrayList().also {
+                    it.clear()
+                    for (i in 0..(jsonArray.length() - 1)){
+                        it.add(MySingleTon.getGson().fromJson(jsonArray[i].toString(),Song::class.java))
+                    }
+                }
+                songRecyclerView.adapter = SongAdapter(MySingleTon.getSongArrayList())
+                songRecyclerView.layoutManager = LinearLayoutManager(this)
+            },
+            Response.ErrorListener {
+                Log.d("MainActivity",it.toString())
+            })
+        MySingleTon.getInstance(this).addToRequestQueue(result)
 
 
-        //val viewModel:MainActivityViewModel by viewModels()
-        val viewModel:MainActivityViewModel by viewModels {
-            MainViewModelProvider(this)
+        pauseButton.setOnClickListener {
+            val mediaPlayer = MySingleTon.getMediaPlayer()
+            if (mediaPlayer.isPlaying){
+                mediaPlayer.pause()
+            }else {
+                mediaPlayer.start()
+            }
         }
 
-        viewModel.getSongs().observe(this, Observer<ArrayList<Song>> {
-            Log.d("MainActivity","调用observe方法")
-            songRecyclerView.adapter = SongAdapter(it)
-            Log.d("MainActivity",it.toString())
-        })
-
-        Log.d("MainActivity","准备执行adapter")
-        if (viewModel.getSongs().value == null){
-            Log.d("MainActivity","为null")
-        }else{
-            Log.d("MainActivity","非null")
+        previousSong.setOnClickListener {
+            val mediaPlayer = MySingleTon.getMediaPlayer()
+            val songList = MySingleTon.getSongArrayList()
+            val index = Random.nextInt(MySingleTon.getSongArrayList().size)
+            mediaPlayer.reset()
+            mediaPlayer.setDataSource("http://47.108.63.126:8001/song/download?singer=${songList[index].singer}&songname=${songList[index].name}")
+            mediaPlayer.prepareAsync()
         }
 
-        songRecyclerView.adapter = SongAdapter(viewModel.getSongs().value?:ArrayList())
+        nextSong.setOnClickListener {
+            val mediaPlayer = MySingleTon.getMediaPlayer()
+            val songList = MySingleTon.getSongArrayList()
+            val index = Random.nextInt(MySingleTon.getSongArrayList().size)
+            mediaPlayer.reset()
+            mediaPlayer.setDataSource("http://47.108.63.126:8001/song/download?singer=${songList[index].singer}&songname=${songList[index].name}")
+            mediaPlayer.prepareAsync()
+        }
+
+        seekTo.setOnClickListener {
+            val mediaPlayer = MySingleTon.getMediaPlayer()
+
+            mediaPlayer.seekTo(mediaPlayer.currentPosition + 30 * 1000)
+        }
+
+
     }
+
 
 }

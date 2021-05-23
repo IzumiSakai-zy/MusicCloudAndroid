@@ -42,6 +42,7 @@ class SongAdapter(val songList:ArrayList<Song>):
             mediaPlayer.setDataSource("http://47.108.63.126:8001/song/download?singer=${songList[position].singer}&songname=${songList[position].name}")
             Log.d("MainActivity","设置DataSource之后")
             mediaPlayer.prepareAsync()
+
             mediaPlayer.setOnPreparedListener {
                 Log.d("MainActivity","setOnPrepareListener")
                 Log.d("MainActivity","准备完成")
